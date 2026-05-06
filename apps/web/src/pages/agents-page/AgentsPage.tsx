@@ -1,11 +1,15 @@
+import { AgentsProvider } from "@/contexts/AgentsContext";
 import AgentAppFrame from "../../components/agent-app-frame/AgentAppFrame";
+import AgentChat from "../../components/agent-chat/AgentChat";
 
 const AgentsPage = () => {
-  return <AgentAppFrame>
-    <div>
-      <h1>Agents</h1>
-    </div>
-  </AgentAppFrame>;
+  return (
+    <AgentsProvider>
+      <AgentAppFrame>
+        <AgentChat />
+      </AgentAppFrame>
+    </AgentsProvider>
+  );
 };
 
 export default AgentsPage;

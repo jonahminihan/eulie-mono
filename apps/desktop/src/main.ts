@@ -2,6 +2,12 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
 import { handleDirSelect, handleFileSelect } from "./helpers/dialog";
+import {
+  createPiSession,
+  getPiSessions,
+  loadPiSession,
+  promptSession,
+} from "./wrappers/pi/pi";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -32,6 +38,23 @@ const createWindow = () => {
 
   ipcMain.handle("dialog:selectFile", handleFileSelect);
   ipcMain.handle("dialog:selectDir", handleDirSelect);
+  ipcMain.handle("pi:createSession", (event, cwd: string) => {
+    return createPiSession(mainWindow, { cwd });
+  });
+  ipcMain.handle("pi:getSessions", getPiSessions);
+  ipcMain.handle("pi:loadSession", (event, sessionId: string) => {
+    return loadPiSession(mainWindow, sessionId);
+  });
+  ipcMain.handle(
+    "pi:promptSession",
+    (event, sessionId: string, message: string) => {
+      return promptSession(sessionId, message);
+    },
+  );
+  // createPiSession(
+  //   "What directory are we in? What files are in the current directory?",
+  //   mainWindow,
+  // );
 };
 
 // This method will be called when Electron has finished

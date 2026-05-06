@@ -2,15 +2,18 @@
 // import reactLogo from './assets/react.svg'
 // import viteLogo from './assets/vite.svg'
 // import heroImg from './assets/hero.png'
-import './App.css'
-import AgentsPage from './pages/agents-page/AgentsPage'
+import { TooltipProvider } from "@/components/ui/tooltip";
+import "./App.css";
+import AgentsPage from "./pages/agents-page/AgentsPage";
 
 function App() {
   // const [count, setCount] = useState(0)
-
+  console.log("App");
   return (
     <>
-    <AgentsPage />
+      <TooltipProvider>
+        <AgentsPage />
+      </TooltipProvider>
       {/* <section id="center">
         <div className="hero">
           <img src={heroImg} className="base" width="170" height="179" alt="" />
@@ -118,7 +121,7 @@ function App() {
       <div className="ticks"></div>
       <section id="spacer"></section> */}
     </>
-  )
+  );
 }
 
-export default App
+export default App;

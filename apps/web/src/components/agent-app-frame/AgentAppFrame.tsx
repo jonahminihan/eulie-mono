@@ -8,7 +8,7 @@ import AgentSidePanel from "./AgentSidePanel";
 const AgentAppFrame = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="h-screen w-screen">
-      <ResizablePanelGroup orientation="horizontal">
+      <ResizablePanelGroup orientation="horizontal" className="h-full w-full">
         <ResizablePanel defaultSize={300}>
           <AgentSidePanel />
         </ResizablePanel>
