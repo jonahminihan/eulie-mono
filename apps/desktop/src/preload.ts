@@ -1,4 +1,7 @@
 // See the Electron documentation for details on how to use preload scripts:
+
+import { PromptOptions } from "@earendil-works/pi-coding-agent";
+
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 const { contextBridge, ipcRenderer } = require("electron");
 
@@ -15,8 +18,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ),
   clearOnNewSessionEvent: () =>
     ipcRenderer.removeAllListeners("pi:onNewSessionEvent"),
-  promptSession: (sessionId: string, message: string) =>
-    ipcRenderer.invoke("pi:promptSession", sessionId, message),
+  promptSession: (
+    sessionId: string,
+    message: string,
+    options?: PromptOptions,
+  ) => ipcRenderer.invoke("pi:promptSession", sessionId, message, options),
   // onMessageDelta: (callback: (delta: string) => void) =>
   //   ipcRenderer.on("pi:messageDelta", callback),
 });

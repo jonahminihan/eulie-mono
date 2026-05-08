@@ -4,8 +4,9 @@ import {
   createAgentSession,
   CreateAgentSessionOptions,
   ModelRegistry,
+  PromptOptions,
   SessionManager,
-} from "@mariozechner/pi-coding-agent";
+} from "@earendil-works/pi-coding-agent";
 import { BrowserWindow } from "electron";
 import {
   addSession,
@@ -85,6 +86,7 @@ export const getPiSessionById = (sessionId: string) => {
 };
 
 const convertSessionToBaseAgentSessionInfo = (session: AgentSession) => {
+  const sessionInfo = getSessionById(session.sessionId);
   return {
     model: session.model,
     thinkingLevel: session.thinkingLevel,
@@ -97,13 +99,19 @@ const convertSessionToBaseAgentSessionInfo = (session: AgentSession) => {
     })),
     messages: session.messages,
     sessionId: session.sessionId,
+    name: sessionInfo?.name,
+    firstMessage: sessionInfo?.firstMessage,
   };
 };
 
-export const promptSession = async (sessionId: string, message: string) => {
+export const promptSession = async (
+  sessionId: string,
+  message: string,
+  options?: PromptOptions,
+) => {
   const session = getActiveSessionById(sessionId);
   if (session) {
-    return await session.prompt(message);
+    return await session.prompt(message, options);
   }
   return;
 };

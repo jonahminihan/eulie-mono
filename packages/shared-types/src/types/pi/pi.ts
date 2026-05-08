@@ -2,8 +2,8 @@ import type {
   AgentMessage,
   AgentTool,
   ThinkingLevel,
-} from "@mariozechner/pi-agent-core";
-import type { Model } from "@mariozechner/pi-ai";
+} from "@earendil-works/pi-agent-core";
+import type { Model } from "@earendil-works/pi-ai";
 
 export interface BaseAgentSessionInfo {
   model: Model<any>;
@@ -11,4 +11,6 @@ export interface BaseAgentSessionInfo {
   tools: AgentTool<any>[];
   messages: AgentMessage[];
   sessionId: string;
+  name: string | undefined;
+  firstMessage: string | undefined;
 }

@@ -2,7 +2,7 @@ import {
   AgentSession,
   SessionInfo,
   SessionManager,
-} from "@mariozechner/pi-coding-agent";
+} from "@earendil-works/pi-coding-agent";
 import { createStore } from "@tanstack/store";
 
 type PiStoreType = {

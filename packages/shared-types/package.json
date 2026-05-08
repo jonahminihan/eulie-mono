@@ -23,7 +23,7 @@
     "vite": "^8.0.10"
   },
   "dependencies": {
-    "@mariozechner/pi-coding-agent": "^0.73.0",
+    "@earendil-works/pi-coding-agent": "^0.74.0",
     "vite-plugin-dts": "^5.0.0"
   }
 }

@@ -15,14 +15,14 @@ import {
   ToolInput,
   ToolOutput,
 } from "@/components/ai-elements/tool";
-import type { AgentMessage } from "@mariozechner/pi-agent-core";
+import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type {
   ImageContent,
   TextContent,
   ThinkingContent,
   ToolCall,
   ToolResultMessage,
-} from "@mariozechner/pi-ai";
+} from "@earendil-works/pi-ai";
 
 const getMessageFrom = (role: string) => {
   switch (role) {

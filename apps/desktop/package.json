@@ -46,7 +46,7 @@
     "shared-types": "workspace:*"
   },
   "dependencies": {
-    "@mariozechner/pi-coding-agent": "^0.73.0",
+    "@earendil-works/pi-coding-agent": "^0.74.0",
     "@tanstack/store": "^0.11.0",
     "electron-squirrel-startup": "^1.0.1"
   }

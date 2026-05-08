@@ -8,6 +8,7 @@ import {
   loadPiSession,
   promptSession,
 } from "./wrappers/pi/pi";
+import { PromptOptions } from "@earendil-works/pi-coding-agent";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -47,8 +48,8 @@ const createWindow = () => {
   });
   ipcMain.handle(
     "pi:promptSession",
-    (event, sessionId: string, message: string) => {
-      return promptSession(sessionId, message);
+    (event, sessionId: string, message: string, options?: PromptOptions) => {
+      return promptSession(sessionId, message, options);
     },
   );
   // createPiSession(

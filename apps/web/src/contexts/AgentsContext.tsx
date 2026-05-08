@@ -1,7 +1,8 @@
 import type {
   AgentSessionEvent,
+  PromptOptions,
   SessionInfo,
-} from "@mariozechner/pi-coding-agent";
+} from "@earendil-works/pi-coding-agent";
 import {
   createContext,
   useContext,
@@ -11,6 +12,8 @@ import {
   useState,
 } from "react";
 import type { BaseAgentSessionInfo } from "shared-types";
+import { useAgentsDock } from "./AgentsDockContext";
+import type { ImageContent } from "@earendil-works/pi-ai";
 
 export type Project = {
   name: string;
@@ -30,7 +33,11 @@ type AgentsContextType = {
   selectAndAddProject: () => Promise<void>;
   createSession: (project: Project) => void;
   loadPiSession: (sessionId: string) => Promise<BaseAgentSessionInfo | null>;
-  promptSession: (sessionId: string, message: string) => Promise<void>;
+  promptSession: (
+    sessionId: string,
+    message: string,
+    options?: PromptOptions,
+  ) => Promise<void>;
 };
 
 const AgentsContext = createContext<AgentsContextType>({
@@ -54,11 +61,12 @@ export const useAgentsContext = () => {
 
 export const AgentsProvider = ({ children }: { children: React.ReactNode }) => {
   const [projectMap, setProjectMap] = useState<Record<string, Project>>({});
-  const initRef = useRef(false);
-  const activeSessionRef = useRef<BaseAgentSessionInfo | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeSession, setActiveSession] =
     useState<BaseAgentSessionInfo | null>(null);
+  const initRef = useRef(false);
+  const activeSessionRef = useRef<BaseAgentSessionInfo | null>(null);
+  const { addTab } = useAgentsDock();
 
   const addProject = (project: Project) => {
     setProjects([...projects, project]);
@@ -124,39 +132,51 @@ export const AgentsProvider = ({ children }: { children: React.ReactNode }) => {
     }, {});
     setProjectMap(newProjectMap);
     setProjects(Object.values(newProjectMap));
-    console.log("fetchPiSessions - new projects", Object.values(newProjectMap));
   };
 
   const loadPiSession = async (sessionId: string) => {
     const session = await window.electronAPI.loadPiSession(sessionId);
     if (session) {
       setActiveSession(session);
+      addTab({
+        id: session.sessionId,
+        component: "default",
+        title: (session.name || session.firstMessage || "New Session").slice(
+          0,
+          7,
+        ),
+        renderer: "always",
+      });
     }
     return session;
   };
 
-  const handleNewSessionEvent = (
-    event: AgentSessionEvent & { sessionId: string },
-  ) => {
-    console.log("event", event);
-    const activeSession = activeSessionRef.current;
-    if (event.sessionId !== activeSession?.sessionId) {
-      console.log("not the active session - activeSession", activeSession);
-      return;
-    }
-    if (event.type === "message_start") {
-      activeSession?.messages.push(event.message);
-    } else if (event.type === "message_update") {
-      activeSession.messages[activeSession.messages.length - 1] = event.message;
-    } else if (event.type === "message_end") {
-      activeSession.messages[activeSession.messages.length - 1] = event.message;
-    }
-    console.log("new activeSession", activeSession);
-    setActiveSession({ ...activeSession });
-  };
+  // const handleNewSessionEvent = (
+  //   event: AgentSessionEvent & { sessionId: string },
+  // ) => {
+  //   console.log("event", event);
+  //   const activeSession = activeSessionRef.current;
+  //   if (event.sessionId !== activeSession?.sessionId) {
+  //     console.log("not the active session - activeSession", activeSession);
+  //     return;
+  //   }
+  //   if (event.type === "message_start") {
+  //     activeSession?.messages.push(event.message);
+  //   } else if (event.type === "message_update") {
+  //     activeSession.messages[activeSession.messages.length - 1] = event.message;
+  //   } else if (event.type === "message_end") {
+  //     activeSession.messages[activeSession.messages.length - 1] = event.message;
+  //   }
+  //   console.log("new activeSession", activeSession);
+  //   setActiveSession({ ...activeSession });
+  // };
 
-  const promptSession = async (sessionId: string, message: string) => {
-    return await window.electronAPI.promptSession(sessionId, message);
+  const promptSession = async (
+    sessionId: string,
+    message: string,
+    options?: PromptOptions,
+  ) => {
+    return await window.electronAPI.promptSession(sessionId, message, options);
   };
 
   useLayoutEffect(() => {
@@ -164,7 +184,7 @@ export const AgentsProvider = ({ children }: { children: React.ReactNode }) => {
       console.log("fetchPiSessions");
       initRef.current = true;
       fetchPiSessions();
-      window.electronAPI.onNewSessionEvent(handleNewSessionEvent);
+      // window.electronAPI.onNewSessionEvent(handleNewSessionEvent);
     }
   }, []);
 

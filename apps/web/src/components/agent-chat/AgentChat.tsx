@@ -29,6 +29,7 @@ import {
   PromptInputTextarea,
   PromptInputTools,
   usePromptInputAttachments,
+  type PromptInputMessage,
 } from "../ai-elements/prompt-input";
 import {
   Attachment,
@@ -37,7 +38,7 @@ import {
   Attachments,
 } from "../ai-elements/attachments";
 import { useAgentsContext } from "@/contexts/AgentsContext";
-import type { AgentMessage } from "@mariozechner/pi-agent-core";
+import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import {
   Tool,
   ToolContent,
@@ -52,15 +53,22 @@ import type {
   ThinkingContent,
   ToolCall,
   ToolResultMessage,
-} from "@mariozechner/pi-ai";
+} from "@earendil-works/pi-ai";
 import AgentChatMessage from "./agent-chat-message/AgentChatMessage";
 import { TypographyP } from "../ui/typography/TypographyP";
+import {
+  AgentsSessionProvider,
+  useAgentsSession,
+} from "@/contexts/AgentsSessionContext";
 
 const PromptInputAttachmentsDisplay = () => {
   const attachments = usePromptInputAttachments();
   if (attachments.files.length === 0) {
     return null;
   }
+
+  console.log("attachments", attachments);
+
   return (
     <Attachments variant="inline">
       {attachments.files.map((attachment) => (
@@ -82,9 +90,10 @@ const models = [
   { id: "claude-opus-4-20250514", name: "Claude 4 Opus" },
 ];
 
-const AgentChat = () => {
-  const { activeSession, promptSession } = useAgentsContext();
-  const { messages, tools, model, thinkingLevel } = activeSession ?? {};
+const AgentChat = ({ sessionId }: { sessionId: string }) => {
+  const { promptSession } = useAgentsContext();
+  const { session } = useAgentsSession();
+  const { messages, tools, model, thinkingLevel } = session ?? {};
   const [text, setText] = useState<string>("");
   const [toolResults, setToolResults] = useState<
     Record<string, ToolResultMessage>
@@ -92,17 +101,36 @@ const AgentChat = () => {
   // const [model, setModel] = useState<string>(models[0].id);
   // const [messages, setMessages] = useState([]);
   // const [status, setStatus] = useState("idle");
-  console.log("activeSession", activeSession);
+  console.log("session", session);
 
-  const handlePromptSession = async () => {
-    if (activeSession) {
+  const handlePromptSession = async (message: PromptInputMessage) => {
+    console.log("message123", message);
+    if (session) {
       setText("");
-      await promptSession(activeSession.sessionId, text);
+      const images: ImageContent[] = [];
+      message.files.forEach((file) => {
+        console.log("file", file);
+        if (file.mediaType.includes("image/")) {
+          console.log("image file", file);
+          images.push({
+            type: "image",
+            data: file.url.slice(file.url.indexOf(",") + 1),
+            // data: file.url,
+            mimeType: file.mediaType,
+            // source: {
+            //   type: "base64",
+            // },
+          });
+        } else {
+          console.log("other file", file);
+        }
+      });
+      console.log("images", images);
+      await promptSession(session.sessionId, text, { images });
     }
   };
 
   useEffect(() => {
-    console.log("messages", messages);
     if (messages) {
       const newToolResults = {} as Record<string, ToolResultMessage>;
       messages.forEach((message) => {
@@ -112,20 +140,24 @@ const AgentChat = () => {
       });
       setToolResults(newToolResults);
     }
-  }, [messages, activeSession]);
+  }, [messages, session]);
 
-  if (activeSession === null) {
+  console.log("AgentChat - session", session);
+
+  if (session === null) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center">
-        <TypographyP text="No session selected" />
+        <TypographyP text="Loading session..." />
       </div>
     );
   }
 
+  // return <div>asdf</div>;
+
   return (
-    <div className="w-full h-full flex flex-col">
+    <div id="AgentChat" className="w-full h-full flex flex-col">
       {/* <AgentChatTextBox /> */}
-      <div className="mx-auto p-6 relative w-full rounded-lg border grow-1 h-full">
+      <div className="mx-auto p-6 relative w-full rounded-lg grow-1 h-full">
         <div className="flex flex-col h-full">
           <Conversation>
             <ConversationContent>
@@ -226,7 +258,7 @@ const AgentChat = () => {
                   <PromptInputActionMenuTrigger />
                   <PromptInputActionMenuContent>
                     <PromptInputActionAddAttachments />
-                    <PromptInputActionAddScreenshot />
+                    {/* <PromptInputActionAddScreenshot /> */}
                   </PromptInputActionMenuContent>
                 </PromptInputActionMenu>
                 {/* <PromptInputButton
@@ -267,4 +299,13 @@ const AgentChat = () => {
   );
 };
 
-export default AgentChat;
+const AgentChatWrapper = ({ sessionId }: { sessionId: string }) => {
+  console.log("AgentChatWrapper - sessionId", sessionId);
+  return (
+    <AgentsSessionProvider sessionId={sessionId}>
+      <AgentChat sessionId={sessionId} />
+    </AgentsSessionProvider>
+  );
+};
+
+export default AgentChatWrapper;

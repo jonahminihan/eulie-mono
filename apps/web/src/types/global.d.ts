@@ -1,4 +1,4 @@
-import { SessionInfo } from "@mariozechner/pi-coding-agent";
+import { SessionInfo, PromptOptions } from "@earendil-works/pi-coding-agent";
 import { BaseAgentSessionInfo } from "shared-types";
 
 // global.d.ts
@@ -15,7 +15,11 @@ declare global {
         sessionId: string,
       ) => Promise<BaseAgentSessionInfo | null>;
       onNewSessionEvent: (callback: (event: AgentSessionEvent) => void) => void;
-      promptSession: (sessionId: string, message: string) => Promise<void>;
+      promptSession: (
+        sessionId: string,
+        message: string,
+        options?: PromptOptions,
+      ) => Promise<void>;
     };
   }
 }
