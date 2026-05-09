@@ -11,6 +11,9 @@ Eulie is an agent harness built on top of the Pi SDK.
 
 - Easily add projects, new sessions, and load previous sessions.
 - Chat with agents that have access to Pi's capabilities (read, write, edit, bash tools)
+
+https://github.com/user-attachments/assets/893ffbe5-191c-4d31-9e7c-ff38dfa5bce1
+
 - Work across multiple sessions simultaneously
 
 ## Getting Started
