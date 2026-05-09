@@ -16,6 +16,8 @@ https://github.com/user-attachments/assets/893ffbe5-191c-4d31-9e7c-ff38dfa5bce1
 
 - Work across multiple sessions simultaneously
 
+https://github.com/user-attachments/assets/c3700b11-bc0b-4fbb-8d30-95ed53986dc3
+
 ## Getting Started
 
 1. Install [Pi](https://pi.dev/), [Setup](https://pi.dev/docs/latest/providers) a model provider, and [setup](https://pi.dev/docs/latest/settings) default model and thinking level (Eulie currently uses this for new sessions)
