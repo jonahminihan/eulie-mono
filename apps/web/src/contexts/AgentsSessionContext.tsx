@@ -31,6 +31,7 @@ export const AgentsSessionProvider = ({
   const [session, setSession] = useState<BaseAgentSessionInfo | null>(null);
   const { loadPiSession } = useAgentsContext();
   const sessionRef = useRef<BaseAgentSessionInfo | null>(null);
+  const initRef = useRef(false);
 
   const init = async () => {
     const newSession = await loadPiSession(sessionId);
@@ -43,7 +44,7 @@ export const AgentsSessionProvider = ({
   const handleNewSessionEvent = (
     event: AgentSessionEvent & { sessionId: string },
   ) => {
-    console.log("event", event);
+    // console.log("event", event);
     const activeSession = sessionRef.current;
     if (event.sessionId !== activeSession?.sessionId) {
       console.log("not the active session - activeSession", activeSession);
@@ -56,12 +57,14 @@ export const AgentsSessionProvider = ({
     } else if (event.type === "message_end") {
       activeSession.messages[activeSession.messages.length - 1] = event.message;
     }
-    console.log("new activeSession", activeSession);
     setSession({ ...activeSession });
   };
 
   useEffect(() => {
-    init();
+    if (!initRef.current) {
+      initRef.current = true;
+      init();
+    }
   }, [sessionId]);
 
   useEffect(() => {

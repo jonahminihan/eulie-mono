@@ -5,26 +5,14 @@ import {
   ConversationScrollButton,
 } from "../ai-elements/conversation";
 import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "../ai-elements/message";
-import {
   PromptInput,
   PromptInputActionAddAttachments,
-  PromptInputActionAddScreenshot,
   PromptInputActionMenu,
   PromptInputActionMenuContent,
   PromptInputActionMenuTrigger,
   PromptInputBody,
-  PromptInputButton,
   PromptInputFooter,
   PromptInputHeader,
-  PromptInputSelect,
-  PromptInputSelectContent,
-  PromptInputSelectItem,
-  PromptInputSelectTrigger,
-  PromptInputSelectValue,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
@@ -38,28 +26,16 @@ import {
   Attachments,
 } from "../ai-elements/attachments";
 import { useAgentsContext } from "@/contexts/AgentsContext";
-import type { AgentMessage } from "@earendil-works/pi-agent-core";
-import {
-  Tool,
-  ToolContent,
-  ToolHeader,
-  ToolInput,
-  ToolOutput,
-} from "../ai-elements/tool";
-import type { ChatStatus, ToolUIPart } from "ai";
-import type {
-  ImageContent,
-  TextContent,
-  ThinkingContent,
-  ToolCall,
-  ToolResultMessage,
-} from "@earendil-works/pi-ai";
+
+import type { ChatStatus } from "ai";
+import type { ImageContent, ToolResultMessage } from "@earendil-works/pi-ai";
 import AgentChatMessage from "./agent-chat-message/AgentChatMessage";
 import { TypographyP } from "../ui/typography/TypographyP";
 import {
   AgentsSessionProvider,
   useAgentsSession,
 } from "@/contexts/AgentsSessionContext";
+import "./AgentChat.module.css";
 
 const PromptInputAttachmentsDisplay = () => {
   const attachments = usePromptInputAttachments();
@@ -98,6 +74,7 @@ const AgentChat = ({ sessionId }: { sessionId: string }) => {
   const [toolResults, setToolResults] = useState<
     Record<string, ToolResultMessage>
   >({});
+  const [initialized, setInitialized] = useState<boolean>(false);
   // const [model, setModel] = useState<string>(models[0].id);
   // const [messages, setMessages] = useState([]);
   // const [status, setStatus] = useState("idle");
@@ -115,11 +92,7 @@ const AgentChat = ({ sessionId }: { sessionId: string }) => {
           images.push({
             type: "image",
             data: file.url.slice(file.url.indexOf(",") + 1),
-            // data: file.url,
             mimeType: file.mediaType,
-            // source: {
-            //   type: "base64",
-            // },
           });
         } else {
           console.log("other file", file);
@@ -152,10 +125,8 @@ const AgentChat = ({ sessionId }: { sessionId: string }) => {
     );
   }
 
-  // return <div>asdf</div>;
-
   return (
-    <div id="AgentChat" className="w-full h-full flex flex-col">
+    <div id="AgentChat" className={`w-full h-full flex flex-col`}>
       {/* <AgentChatTextBox /> */}
       <div className="mx-auto p-6 relative w-full rounded-lg grow-1 h-full">
         <div className="flex flex-col h-full">
@@ -167,72 +138,6 @@ const AgentChat = ({ sessionId }: { sessionId: string }) => {
                   index={index}
                   toolResults={toolResults}
                 />
-                // <Message
-                //   from={getMessageFrom(message.role)}
-                //   key={`${index}-${message.timestamp}`}
-                //   className="text-left"
-                // >
-                //   <MessageContent>
-                //     {typeof message.content === "string" ? (
-                //       <MessageResponse
-                //         key={`message-${index}-${message.timestamp}`}
-                //       >
-                //         {message.content}
-                //       </MessageResponse>
-                //     ) : (
-                //       (
-                //         message.content as (
-                //           | TextContent
-                //           | ImageContent
-                //           | ThinkingContent
-                //           | ToolCall
-                //         )[]
-                //       ).map((part, i) => {
-                //         switch (part.type) {
-                //           case "toolCall":
-                //             return (
-                //               <Tool>
-                //                 <ToolHeader
-                //                   state={
-                //                     toolResults[part.id]
-                //                       ? "output-available"
-                //                       : "approval-responded"
-                //                   }
-                //                   title={part.name}
-                //                   type={`tool-${part.name}`}
-                //                 />
-                //                 <ToolContent>
-                //                   <ToolInput input={part.arguments} />
-                //                   <ToolOutput
-                //                     output={
-                //                       toolResults[part.id]?.content.length > 0
-                //                         ? (
-                //                             toolResults[part.id]
-                //                               ?.content[0] as TextContent
-                //                           ).text
-                //                         : ""
-                //                     }
-                //                     errorText={""}
-                //                   />
-                //                 </ToolContent>
-                //               </Tool>
-                //             );
-                //           case "text":
-                //           default:
-                //             return (
-                //               <MessageResponse
-                //                 key={`message-${index}-${message.timestamp}-${i}`}
-                //               >
-                //                 {message.role !== "toolResult" && "text" in part
-                //                   ? part.text
-                //                   : ""}
-                //               </MessageResponse>
-                //             );
-                //         }
-                //       })
-                //     )}
-                //   </MessageContent>
-                // </Message>
               ))}
             </ConversationContent>
             <ConversationScrollButton />

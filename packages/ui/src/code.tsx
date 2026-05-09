@@ -7,5 +7,9 @@ export function Code({
   children: React.ReactNode;
   className?: string;
 }): JSX.Element {
-  return <code className={className}>{children}</code>;
+  return (
+    <code id="ui-code-block-body" className={className}>
+      {children}
+    </code>
+  );
 }

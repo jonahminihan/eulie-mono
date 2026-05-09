@@ -24,7 +24,6 @@ const createWindow = () => {
       preload: path.join(__dirname, "preload.js"),
     },
   });
-  console.log(process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL);
   // and load the index.html of the app.
   if (process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL);
@@ -52,10 +51,6 @@ const createWindow = () => {
       return promptSession(sessionId, message, options);
     },
   );
-  // createPiSession(
-  //   "What directory are we in? What files are in the current directory?",
-  //   mainWindow,
-  // );
 };
 
 // This method will be called when Electron has finished

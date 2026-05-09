@@ -24,7 +24,6 @@ export const createPiSession = async (
 ) => {
   const { session } = await createAgentSession({
     ...createAgentSessionOptions,
-    // sessionManager: SessionManager.inMemory(),
     authStorage,
     modelRegistry,
   });
@@ -43,8 +42,6 @@ export const createPiSession = async (
         event.assistantMessageEvent.delta,
       );
     }
-    // mainWindow.webContents.send("pi:event", event);
-    console.log("event", event);
     mainWindow.webContents.send("pi:onNewSessionEvent", {
       ...event,
       sessionId: session.sessionId,
@@ -65,7 +62,6 @@ export const loadPiSession = async (
 ) => {
   const session = getActiveSessionById(sessionId);
   if (session) {
-    console.log("session 1", convertSessionToBaseAgentSessionInfo(session));
     return convertSessionToBaseAgentSessionInfo(session);
   }
   const sessionInfo = getSessionById(sessionId);
@@ -115,7 +111,3 @@ export const promptSession = async (
   }
   return;
 };
-
-// export const getPiSessionMessages = (sessionId: string) => {
-//   return getActiveSessionById(sessionId).;
-// };

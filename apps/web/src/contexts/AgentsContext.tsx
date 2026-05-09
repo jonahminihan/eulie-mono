@@ -1,19 +1,16 @@
 import type {
-  AgentSessionEvent,
   PromptOptions,
   SessionInfo,
 } from "@earendil-works/pi-coding-agent";
 import {
   createContext,
   useContext,
-  useEffect,
   useLayoutEffect,
   useRef,
   useState,
 } from "react";
 import type { BaseAgentSessionInfo } from "shared-types";
 import { useAgentsDock } from "./AgentsDockContext";
-import type { ImageContent } from "@earendil-works/pi-ai";
 
 export type Project = {
   name: string;
@@ -27,8 +24,6 @@ export type Session = {
 
 type AgentsContextType = {
   projects: Project[];
-  activeSession: BaseAgentSessionInfo | null;
-  setActiveSession: (session: BaseAgentSessionInfo | null) => void;
   addProject: (project: Project) => void;
   selectAndAddProject: () => Promise<void>;
   createSession: (project: Project) => void;
@@ -42,8 +37,6 @@ type AgentsContextType = {
 
 const AgentsContext = createContext<AgentsContextType>({
   projects: [],
-  activeSession: null,
-  setActiveSession: () => {},
   addProject: () => {},
   selectAndAddProject: () => Promise.resolve(),
   createSession: () => {},
@@ -62,10 +55,7 @@ export const useAgentsContext = () => {
 export const AgentsProvider = ({ children }: { children: React.ReactNode }) => {
   const [projectMap, setProjectMap] = useState<Record<string, Project>>({});
   const [projects, setProjects] = useState<Project[]>([]);
-  const [activeSession, setActiveSession] =
-    useState<BaseAgentSessionInfo | null>(null);
   const initRef = useRef(false);
-  const activeSessionRef = useRef<BaseAgentSessionInfo | null>(null);
   const { addTab } = useAgentsDock();
 
   const addProject = (project: Project) => {
@@ -106,38 +96,6 @@ export const AgentsProvider = ({ children }: { children: React.ReactNode }) => {
       };
       setProjectMap(newProjectMap);
       setProjects(Object.values(newProjectMap));
-      setActiveSession(session);
-    }
-    return session;
-  };
-
-  const fetchPiSessions = async () => {
-    const sessions = await window.electronAPI.getPiSessions();
-    console.log("sessions", sessions);
-    const newProjectMap = sessions.reduce((acc, session) => {
-      //@ts-ignore
-      if (!acc[session.cwd]) {
-        //@ts-ignore
-        acc[session.cwd] = {
-          //@ts-ignore
-          name: session.cwd.split("/").pop() || "",
-          //@ts-ignore
-          path: session.cwd,
-          sessions: [],
-        };
-      }
-      //@ts-ignore
-      acc[session.cwd].sessions.push(session);
-      return acc;
-    }, {});
-    setProjectMap(newProjectMap);
-    setProjects(Object.values(newProjectMap));
-  };
-
-  const loadPiSession = async (sessionId: string) => {
-    const session = await window.electronAPI.loadPiSession(sessionId);
-    if (session) {
-      setActiveSession(session);
       addTab({
         id: session.sessionId,
         component: "default",
@@ -151,25 +109,39 @@ export const AgentsProvider = ({ children }: { children: React.ReactNode }) => {
     return session;
   };
 
-  // const handleNewSessionEvent = (
-  //   event: AgentSessionEvent & { sessionId: string },
-  // ) => {
-  //   console.log("event", event);
-  //   const activeSession = activeSessionRef.current;
-  //   if (event.sessionId !== activeSession?.sessionId) {
-  //     console.log("not the active session - activeSession", activeSession);
-  //     return;
-  //   }
-  //   if (event.type === "message_start") {
-  //     activeSession?.messages.push(event.message);
-  //   } else if (event.type === "message_update") {
-  //     activeSession.messages[activeSession.messages.length - 1] = event.message;
-  //   } else if (event.type === "message_end") {
-  //     activeSession.messages[activeSession.messages.length - 1] = event.message;
-  //   }
-  //   console.log("new activeSession", activeSession);
-  //   setActiveSession({ ...activeSession });
-  // };
+  const fetchPiSessions = async () => {
+    const sessions = await window.electronAPI.getPiSessions();
+    console.log("sessions", sessions);
+    const newProjectMap = sessions.reduce((acc, session) => {
+      if (!acc[session.cwd]) {
+        acc[session.cwd] = {
+          name: session.cwd.split("/").pop() || "",
+          path: session.cwd,
+          sessions: [],
+        };
+      }
+      acc[session.cwd].sessions.push(session);
+      return acc;
+    }, {});
+    setProjectMap(newProjectMap);
+    setProjects(Object.values(newProjectMap));
+  };
+
+  const loadPiSession = async (sessionId: string) => {
+    const session = await window.electronAPI.loadPiSession(sessionId);
+    if (session) {
+      addTab({
+        id: session.sessionId,
+        component: "default",
+        title: (session.name || session.firstMessage || "New Session").slice(
+          0,
+          7,
+        ),
+        renderer: "always",
+      });
+    }
+    return session;
+  };
 
   const promptSession = async (
     sessionId: string,
@@ -184,13 +156,8 @@ export const AgentsProvider = ({ children }: { children: React.ReactNode }) => {
       console.log("fetchPiSessions");
       initRef.current = true;
       fetchPiSessions();
-      // window.electronAPI.onNewSessionEvent(handleNewSessionEvent);
     }
   }, []);
-
-  useEffect(() => {
-    activeSessionRef.current = activeSession;
-  }, [activeSession]);
 
   return (
     <AgentsContext.Provider
@@ -199,8 +166,6 @@ export const AgentsProvider = ({ children }: { children: React.ReactNode }) => {
         addProject,
         selectAndAddProject,
         createSession,
-        activeSession,
-        setActiveSession,
         loadPiSession,
         promptSession,
       }}

@@ -1,0 +1,5 @@
+[data-streamdown="code-block-body"] > pre > code {
+    display: flex;
+    flex-direction: column;
+    overflow-x: auto;
+}

@@ -14,21 +14,12 @@ import { NonButton } from "../ui/non-button";
 
 const AgentTreeViewProject = ({ project }: { project: Project }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { loadPiSession, activeSession, createSession } = useAgentsContext();
+  const { loadPiSession, createSession } = useAgentsContext();
   const handleAddSession = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("add session");
     createSession(project);
   };
-
-  // const handleLoadPiSession = async (sessionId: string) => {
-  //   const session = await loadPiSession(sessionId);
-  //   console.log("session", session);
-  //   if (session) {
-  //     setActiveSession(session);
-  //   }
-  // };
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -60,7 +51,7 @@ const AgentTreeViewProject = ({ project }: { project: Project }) => {
               <Button
                 key={session.id}
                 variant="ghost"
-                className={`flex justify-start w-full ${activeSession?.sessionId === session.id ? "bg-muted" : ""}`}
+                className={`flex justify-start w-full`}
                 onClick={() => loadPiSession(session.id)}
               >
                 <TypographyP

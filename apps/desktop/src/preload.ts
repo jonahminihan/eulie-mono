@@ -23,6 +23,4 @@ contextBridge.exposeInMainWorld("electronAPI", {
     message: string,
     options?: PromptOptions,
   ) => ipcRenderer.invoke("pi:promptSession", sessionId, message, options),
-  // onMessageDelta: (callback: (delta: string) => void) =>
-  //   ipcRenderer.on("pi:messageDelta", callback),
 });
