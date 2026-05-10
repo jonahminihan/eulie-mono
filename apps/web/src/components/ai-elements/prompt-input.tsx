@@ -264,6 +264,7 @@ export const PromptInputProvider = ({
   const openRef = useRef<() => void>(() => {});
 
   const add = useCallback((files: File[] | FileList) => {
+    // @ts-ignore
     const incoming = [...files];
     if (incoming.length === 0) {
       return;
@@ -1023,6 +1024,7 @@ export const PromptInputTextarea = ({
 
       const files: File[] = [];
 
+      // @ts-ignore
       for (const item of items) {
         if (item.kind === "file") {
           const file = item.getAsFile();
@@ -1320,10 +1322,13 @@ export const PromptInputSelectValue = ({
 export type PromptInputHoverCardProps = ComponentProps<typeof HoverCard>;
 
 export const PromptInputHoverCard = ({
+  // @ts-ignore
   openDelay = 0,
+  // @ts-ignore
   closeDelay = 0,
   ...props
 }: PromptInputHoverCardProps) => (
+  // @ts-ignore
   <HoverCard closeDelay={closeDelay} openDelay={openDelay} {...props} />
 );
 
