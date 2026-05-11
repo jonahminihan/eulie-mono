@@ -9,6 +9,9 @@ import {
   promptSession,
 } from "./wrappers/pi/pi";
 import { PromptOptions } from "@earendil-works/pi-coding-agent";
+import fixPath from "fix-path";
+
+fixPath();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -28,9 +31,7 @@ const createWindow = () => {
   if (process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
-    mainWindow.loadFile(
-      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
-    );
+    mainWindow.loadFile(path.join(__dirname, `./index.html`));
   }
 
   // Open the DevTools.

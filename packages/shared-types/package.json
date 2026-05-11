@@ -24,6 +24,8 @@
   },
   "dependencies": {
     "@earendil-works/pi-coding-agent": "^0.74.0",
+    "@earendil-works/pi-agent-core": "^0.74.0",
+    "@earendil-works/pi-ai": "^0.74.0",
     "vite-plugin-dts": "^5.0.0"
   }
 }

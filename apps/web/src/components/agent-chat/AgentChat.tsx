@@ -61,20 +61,19 @@ const PromptInputAttachmentsDisplay = () => {
   );
 };
 
-const models = [
-  { id: "gpt-4o", name: "GPT-4o" },
-  { id: "claude-opus-4-20250514", name: "Claude 4 Opus" },
-];
+// const models = [
+//   { id: "gpt-4o", name: "GPT-4o" },
+//   { id: "claude-opus-4-20250514", name: "Claude 4 Opus" },
+// ];
 
-const AgentChat = ({ sessionId }: { sessionId: string }) => {
+const AgentChat = () => {
   const { promptSession } = useAgentsContext();
   const { session } = useAgentsSession();
-  const { messages, tools, model, thinkingLevel } = session ?? {};
+  const { messages } = session ?? {};
   const [text, setText] = useState<string>("");
   const [toolResults, setToolResults] = useState<
     Record<string, ToolResultMessage>
   >({});
-  const [initialized, setInitialized] = useState<boolean>(false);
   // const [model, setModel] = useState<string>(models[0].id);
   // const [messages, setMessages] = useState([]);
   // const [status, setStatus] = useState("idle");
@@ -127,7 +126,6 @@ const AgentChat = ({ sessionId }: { sessionId: string }) => {
 
   return (
     <div id="AgentChat" className={`w-full h-full flex flex-col`}>
-      {/* <AgentChatTextBox /> */}
       <div className="mx-auto p-6 relative w-full rounded-lg grow-1 h-full">
         <div className="flex flex-col h-full">
           <Conversation>
@@ -208,7 +206,7 @@ const AgentChatWrapper = ({ sessionId }: { sessionId: string }) => {
   console.log("AgentChatWrapper - sessionId", sessionId);
   return (
     <AgentsSessionProvider sessionId={sessionId}>
-      <AgentChat sessionId={sessionId} />
+      <AgentChat />
     </AgentsSessionProvider>
   );
 };

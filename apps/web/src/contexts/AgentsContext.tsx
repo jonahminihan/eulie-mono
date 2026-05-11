@@ -84,8 +84,8 @@ export const AgentsProvider = ({ children }: { children: React.ReactNode }) => {
         created: new Date(),
         modified: new Date(),
         messageCount: 0,
-        firstMessage: undefined,
-        allMessagesText: undefined,
+        firstMessage: "",
+        allMessagesText: "",
       };
       const newProjectMap = {
         ...projectMap,
@@ -112,17 +112,20 @@ export const AgentsProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchPiSessions = async () => {
     const sessions = await window.electronAPI.getPiSessions();
     console.log("sessions", sessions);
-    const newProjectMap = sessions.reduce((acc, session) => {
-      if (!acc[session.cwd]) {
-        acc[session.cwd] = {
-          name: session.cwd.split("/").pop() || "",
-          path: session.cwd,
-          sessions: [],
-        };
-      }
-      acc[session.cwd].sessions.push(session);
-      return acc;
-    }, {});
+    const newProjectMap = sessions.reduce(
+      (acc, session) => {
+        if (!acc[session.cwd]) {
+          acc[session.cwd] = {
+            name: session.cwd.split("/").pop() || "",
+            path: session.cwd,
+            sessions: [],
+          };
+        }
+        acc[session.cwd].sessions.push(session);
+        return acc;
+      },
+      {} as Record<string, Project>,
+    );
     setProjectMap(newProjectMap);
     setProjects(Object.values(newProjectMap));
   };

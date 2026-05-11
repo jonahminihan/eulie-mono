@@ -1,3 +1,17 @@
 packages:
   - "apps/*"
   - "packages/*"
+allowBuilds:
+  "@google/genai": true
+  electron: true
+  electron-winstaller: true
+  esbuild: true
+  koffi: true
+  msw: true
+  protobufjs: true
+  sharp: true
+  "@electron/node-gyp": true
+  "@electron-forge/cli": true
+
+blockExoticSubdeps: false
+nodeLinker: hoisted
