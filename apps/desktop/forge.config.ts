@@ -11,6 +11,18 @@ const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
   },
+  publishers: [
+    {
+      name: "@electron-forge/publisher-github",
+      config: {
+        repository: {
+          owner: "jonahminihan",
+          name: "eulie-mono",
+        },
+        prerelease: true,
+      },
+    },
+  ],
   rebuildConfig: {},
   makers: [
     new MakerSquirrel({}),
