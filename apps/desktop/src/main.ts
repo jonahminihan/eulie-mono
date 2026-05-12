@@ -10,13 +10,18 @@ import {
 } from "./wrappers/pi/pi";
 import { PromptOptions } from "@earendil-works/pi-coding-agent";
 import fixPath from "fix-path";
-
 fixPath();
 
+import { startServer, stopServer } from "./server";
+import log from "electron-log/main";
+
+log.initialize();
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
 }
+
+const serverProcess = startServer();
 
 const createWindow = () => {
   // Create the browser window.
@@ -74,6 +79,12 @@ app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
+});
+
+app.on("will-quit", () => {
+  serverProcess.kill();
+  stopServer();
+  log.info("Server process killed");
 });
 
 // In this file you can include the rest of your app's specific main process

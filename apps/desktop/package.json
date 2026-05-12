@@ -1,8 +1,8 @@
 {
-  "name": "desktop",
-  "productName": "desktop",
+  "name": "Eulie",
+  "productName": "Eulie",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "Eulie is an agent harness built on top of the Pi SDK.",
   "main": ".vite/build/main.js",
   "private": true,
   "scripts": {
@@ -51,7 +51,10 @@
   "dependencies": {
     "@earendil-works/pi-coding-agent": "^0.74.0",
     "@tanstack/store": "^0.11.0",
+    "electron-log": "^5.4.3",
     "electron-squirrel-startup": "^1.0.1",
-    "fix-path": "^5.0.0"
+    "fix-path": "^5.0.0",
+    "jiti": "^2.7.0",
+    "vite-plugin-static-copy": "^4.1.0"
   }
 }
