@@ -4,9 +4,8 @@
   "description": "Server for the Eulie project",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts"
+    "start": "node src/index.ts",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'node' src/index.ts"
   },
   "dependencies": {
     "express": "^5.2.1",
