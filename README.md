@@ -23,5 +23,9 @@ https://github.com/user-attachments/assets/c3700b11-bc0b-4fbb-8d30-95ed53986dc3
 1. Install [Pi](https://pi.dev/), [Setup](https://pi.dev/docs/latest/providers) a model provider, and [setup](https://pi.dev/docs/latest/settings) default model and thinking level (Eulie currently uses this for new sessions)
 2. Clone the repo `git clone https://github.com/jonahminihan/eulie-mono.git`
 3. Run `pnpm install` in the package
-4. Run `cd apps/web && pnpm run dev`
-5. In a new terminal session, run `pnpm run start` in the apps/desktop directory
+4. Run `pnpm dlx turbo run dev`
+
+### To make a build
+
+1. Run `pnpm dlx turbo run dev`
+2. Build will be located in apps/desktop/out/Eulie-darwin-arm64
