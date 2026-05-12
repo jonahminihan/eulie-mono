@@ -16,12 +16,6 @@ export const startServer = () => {
     });
     return serverProcess;
   } else {
-    log.info(
-      "Run server in production, path:",
-      path.join(process.resourcesPath, "./server/src/index.ts"),
-    );
-    log.info("Run server in production, $PATH:", process.env.PATH);
-
     const serverProcess = spawn("node", [
       path.join(process.resourcesPath, "./server/src/index.ts"),
     ]);
