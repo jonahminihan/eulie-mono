@@ -1,7 +1,2 @@
-export * from "./types/pi/pi";
-
-const test = () => {
-  console.log("test1");
-};
-
-export { test };
+export * from "./types/pi/pi.js";
+export * from "./types/eu/eu.js";

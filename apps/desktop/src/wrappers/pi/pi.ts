@@ -11,8 +11,11 @@ import { BrowserWindow } from "electron";
 import {
   addSession,
   getActiveSessionById,
+  getExtensionToolUIs,
   getSessionById,
+  setExtensions,
 } from "../../stores/piStore";
+import { getExtensions } from "../../helpers/extensions";
 
 // Set up credential storage and model registry
 const authStorage = AuthStorage.create();
@@ -110,4 +113,22 @@ export const promptSession = async (
     return await session.prompt(message, options);
   }
   return;
+};
+
+export const loadPiExtensions = async () => {
+  const extensions = await getExtensions();
+  setExtensions(extensions);
+};
+
+export const getPiExtensionToolUIs = async () => {
+  return getExtensionToolUIs();
+};
+
+export const getPiExtensionUIData = async () => {
+  return {
+    toolUIs: getExtensionToolUIs().map((t: any) => ({
+      toolName: t.toolName,
+      component: t.component.toString(),
+    })),
+  };
 };

@@ -6,15 +6,17 @@ import {
   CollapsibleContent,
 } from "../ui/collapsible";
 import { TypographyP } from "../ui/typography/TypographyP";
-import { useAgentsContext, type Project } from "@/contexts/AgentsContext";
+import { type Project } from "@/contexts/AgentsContext";
 import { useState } from "react";
 import { ChevronDown, ChevronRight, Plus } from "lucide-react";
 import { TypographyMuted } from "../ui/typography/TypographyMuted";
 import { NonButton } from "../ui/non-button";
+import { useAgentsWSContext } from "@/contexts/AgentsContextWS";
 
 const AgentTreeViewProject = ({ project }: { project: Project }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { loadPiSession, createSession } = useAgentsContext();
+  const { loadPiSession, createSession } = useAgentsWSContext();
+
   const handleAddSession = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();

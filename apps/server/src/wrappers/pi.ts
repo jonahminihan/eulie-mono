@@ -10,12 +10,8 @@ import {
 import {
   addSession,
   getActiveSessionById,
-  getExtensionToolUIs,
   getSessionById,
-  setExtensions,
 } from "../stores/piStore.ts";
-import { getPiCandidatePaths } from "../utils/piPaths.ts";
-import { getExtensions } from "../utils/extensions.ts";
 import type { Socket } from "socket.io";
 
 // Set up credential storage and model registry
@@ -31,13 +27,6 @@ export const createPiSession = async (
     authStorage,
     modelRegistry,
   });
-
-  const extensionPaths = session.extensionRunner.getExtensionPaths();
-  console.log("extensionPaths", extensionPaths);
-  const candidatePaths = await getPiCandidatePaths();
-  console.log("candidatePaths", candidatePaths);
-  const extensions = await getExtensions();
-  console.log("extensions", extensions);
 
   session.subscribe((event) => {
     if (
@@ -115,34 +104,4 @@ export const promptSession = async (
     return await session.prompt(message, options);
   }
   return;
-};
-
-export const loadPiExtensions = async () => {
-  const extensions = await getExtensions();
-  setExtensions(extensions);
-};
-
-export const getPiExtensionToolUIs = async () => {
-  return await getExtensionToolUIs();
-};
-
-export const getPiExtensionUIData = async () => {
-  console.log("getPiExtensionUIData", {
-    toolUIs: (await getExtensionToolUIs()).map((t: any) => ({
-      toolName: t.toolName,
-      component: t.component,
-    })),
-  });
-  console.log("getPiExtensionUIData with stringified component", {
-    toolUIs: (await getExtensionToolUIs()).map((t: any) => ({
-      toolName: t.toolName,
-      component: t.component.toString(),
-    })),
-  });
-  return {
-    toolUIs: (await getExtensionToolUIs()).map((t: any) => ({
-      toolName: t.toolName,
-      component: t.component.toString(),
-    })),
-  };
 };

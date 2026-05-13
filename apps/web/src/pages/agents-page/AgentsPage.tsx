@@ -1,16 +1,16 @@
-import { AgentsProvider } from "@/contexts/AgentsContext";
 import AgentAppFrame from "../../components/agent-app-frame/AgentAppFrame";
 import AgentDock from "@/components/agent-dock/AgentDock";
 import { AgentsDockProvider } from "@/contexts/AgentsDockContext";
+import { AgentsWSProvider } from "@/contexts/AgentsContextWS";
 
 const AgentsPage = () => {
   return (
     <AgentsDockProvider>
-      <AgentsProvider>
+      <AgentsWSProvider>
         <AgentAppFrame>
           <AgentDock />
         </AgentAppFrame>
-      </AgentsProvider>
+      </AgentsWSProvider>
     </AgentsDockProvider>
   );
 };

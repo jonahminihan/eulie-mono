@@ -7,11 +7,13 @@ import { Server } from "socket.io";
 import { createServer } from "http";
 import {
   createPiSession,
-  getPiExtensionUIData,
   getPiSessions,
   loadPiSession,
   promptSession,
 } from "./wrappers/pi.ts";
+import path from "path";
+import cors from "cors";
+import { getExtensions } from "./stores/piStore.ts";
 
 const app: Application = express();
 const server = createServer(app);
@@ -24,6 +26,9 @@ const io = new Server(server, {
   },
 });
 
+// Enable CORS for all requests
+app.use(cors());
+
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello from TypeScript Express!");
 });
@@ -32,38 +37,38 @@ io.on("connection", (socket) => {
   console.log("a user connected");
 
   socket.on("pi:createSession", async (data, callback) => {
-    console.log("pi:createSession", data, callback);
     const { cwd } = data;
     const session = await createPiSession(socket, { cwd });
-    console.log("pi:createSession session", session);
     callback(session);
   });
 
   socket.on("pi:getSessions", async (callback) => {
-    console.log("pi:getSessions", callback);
     const sessions = await getPiSessions();
     callback(sessions);
   });
 
   socket.on("pi:loadSession", async (data, callback) => {
-    console.log("pi:loadSession", socket);
     const { sessionId } = data;
     const session = await loadPiSession(socket, sessionId);
     callback(session);
   });
 
   socket.on("pi:promptSession", async (data, callback) => {
-    console.log("pi:promptSession", data, callback);
     const { sessionId, message, options } = data;
     const result = await promptSession(sessionId, message, options);
     callback?.(result);
   });
 
-  socket.on("pi:loadExtensionData", async (callback) => {
-    console.log("a user connected");
+  socket.on("pi:getExtensionsPaths", async (callback) => {
+    const extensionPaths = getExtensions();
+    callback(extensionPaths);
+  });
+});
 
-    const extensionData = await getPiExtensionUIData();
-    callback(extensionData);
+app.get("/extension/*path", (req: Request, res: Response) => {
+  const extensionPath = (req.params.path as string[]).join("/");
+  res.sendFile("index.js", {
+    root: path.join("/", extensionPath, "dist"),
   });
 });
 

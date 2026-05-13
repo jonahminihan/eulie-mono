@@ -20,6 +20,7 @@ declare global {
         message: string,
         options?: PromptOptions,
       ) => Promise<void>;
+      loadPiExtensionData: () => Promise<{ toolUIs: any[] }>;
     };
   }
 }

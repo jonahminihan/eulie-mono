@@ -1,11 +1,11 @@
 {
-  "name": "shared-types",
+  "name": "eulie-extension",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
-  "types": "./dist/src/index.d.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/src/index.d.ts",
@@ -18,13 +18,16 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/react": "^19.2.14",
     "typescript": "~6.0.2",
     "vite": "^8.0.10"
   },
   "dependencies": {
-    "@earendil-works/pi-coding-agent": "^0.74.0",
     "@earendil-works/pi-agent-core": "^0.74.0",
     "@earendil-works/pi-ai": "^0.74.0",
+    "@earendil-works/pi-coding-agent": "^0.74.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "vite-plugin-dts": "^5.0.0"
   }
 }

@@ -1,11 +1,12 @@
-import { useAgentsContext } from "@/contexts/AgentsContext";
 import { TypographyLarge } from "../ui/typography/TypographyLarge";
 import AgentTreeViewProject from "./AgentTreeViewProject";
 import { Button } from "../ui/button";
 import { FolderPlus } from "lucide-react";
+import { useAgentsWSContext } from "@/contexts/AgentsContextWS";
 
 const AgentTreeView = () => {
-  const { projects, selectAndAddProject } = useAgentsContext();
+  const { projects, selectAndAddProject } = useAgentsWSContext();
+
   return (
     <div className="flex flex-col justify-start">
       <div className="flex justify-between w-full">

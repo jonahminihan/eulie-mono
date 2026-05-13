@@ -1,6 +1,6 @@
 import {
   AgentSession,
-  SessionInfo,
+  type SessionInfo,
   SessionManager,
 } from "@earendil-works/pi-coding-agent";
 import { createStore } from "@tanstack/store";
@@ -8,11 +8,13 @@ import { createStore } from "@tanstack/store";
 type PiStoreType = {
   activeSessions: AgentSession[];
   historicalSessions: SessionInfo[];
+  extensions: {};
 };
 
 export const piStore = createStore<PiStoreType>({
   activeSessions: [],
   historicalSessions: [],
+  extensions: {},
 });
 
 export const initPiStore = async () => {
@@ -30,6 +32,21 @@ export const addSession = (session: AgentSession) => {
     ...prev,
     activeSessions: [...prev.activeSessions, session],
   }));
+};
+
+export const setExtensions = (extensions: { toolUIs: any[] }) => {
+  piStore.setState((prev) => ({
+    ...prev,
+    extensions: extensions,
+  }));
+};
+
+export const getExtensions = () => {
+  return piStore.state.extensions;
+};
+
+export const getExtensionToolUIs = () => {
+  return (piStore.state.extensions as { toolUIs: any[] }).toolUIs;
 };
 
 export const getActiveSessions = () => {

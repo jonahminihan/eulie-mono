@@ -10,7 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type { BaseAgentSessionInfo } from "shared-types";
+import type { BaseAgentSessionInfo, EuExtensionPath } from "shared-types";
 import { useAgentsDock } from "./AgentsDockContext";
 import { io, Socket } from "socket.io-client";
 
@@ -68,6 +68,7 @@ export const AgentsWSProvider = ({
   const socketRef = useRef<Socket | null>(null);
   const [projectMap, setProjectMap] = useState<Record<string, Project>>({});
   const [projects, setProjects] = useState<Project[]>([]);
+  const [serverURL] = useState<string>("http://localhost:3030");
   const initRef = useRef(false);
   const { addTab } = useAgentsDock();
 
@@ -194,7 +195,7 @@ export const AgentsWSProvider = ({
   };
 
   const connectToSocketServer = () => {
-    const newSocket = io("http://localhost:3030");
+    const newSocket = io(serverURL);
     newSocket.on("connect", () => {
       console.log("connected to socket server");
       fetchPiSessions();
@@ -218,10 +219,36 @@ export const AgentsWSProvider = ({
     socket.on("pi:onNewSessionEvent", callback);
   };
 
+  const loadExtensions = async (extensionPaths: EuExtensionPath[]) => {
+    const toolUIs: { toolName: string; component: React.ReactNode }[] = [];
+    const registerToolUI = (toolName: string, component: React.ReactNode) => {
+      toolUIs.push({ toolName, component });
+    };
+    for (const extensionPath of extensionPaths) {
+      (
+        await import(
+          `${serverURL}/extension${extensionPath.parentPath}/${extensionPath.name}`
+        )
+      ).setupEulie({ registerToolUI });
+    }
+  };
+
+  const fetchExtensionData = async () => {
+    const socket = socketRef.current;
+    if (!socket) return;
+    socket.emit(
+      "pi:getExtensionsPaths",
+      async (extensionData: EuExtensionPath[]) => {
+        loadExtensions(extensionData);
+      },
+    );
+  };
+
   useLayoutEffect(() => {
     if (!initRef.current) {
       initRef.current = true;
       connectToSocketServer();
+      fetchExtensionData();
     }
   }, []);
 

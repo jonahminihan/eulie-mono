@@ -1,7 +1,6 @@
 import { readdir } from "node:fs/promises";
-import { getPiCandidatePaths } from "./piPaths.ts";
+import { getPiCandidatePaths } from "./piPaths";
 import { createJiti } from "jiti";
-import type { EuExtensionPath } from "shared-types";
 
 const combineExtensions = (extensions: any[]) => {
   const toolUIs = [];
@@ -48,22 +47,4 @@ export const getExtensions = async () => {
   extensions = await Promise.all(extensions);
   console.log("extensions", extensions);
   return combineExtensions(extensions);
-};
-
-export const getExtensionsPaths = async () => {
-  const extensionPaths = (await getPiCandidatePaths()).extensions;
-  let extensions: EuExtensionPath[] = [];
-  for (const path of extensionPaths) {
-    try {
-      const files = await readdir(path, { withFileTypes: true });
-      extensions.push(
-        ...files
-          .filter((file) => file.isDirectory())
-          .map((file) => {
-            return { parentPath: file.parentPath, name: file.name };
-          }),
-      );
-    } catch (error) {}
-  }
-  return extensions;
 };

@@ -25,17 +25,18 @@ import {
   AttachmentRemove,
   Attachments,
 } from "../ai-elements/attachments";
-import { useAgentsContext } from "@/contexts/AgentsContext";
 
 import type { ChatStatus } from "ai";
 import type { ImageContent, ToolResultMessage } from "@earendil-works/pi-ai";
 import AgentChatMessage from "./agent-chat-message/AgentChatMessage";
 import { TypographyP } from "../ui/typography/TypographyP";
-import {
-  AgentsSessionProvider,
-  useAgentsSession,
-} from "@/contexts/AgentsSessionContext";
+
 import "./AgentChat.module.css";
+import { useAgentsWSContext } from "@/contexts/AgentsContextWS";
+import {
+  AgentsSessionWSProvider,
+  useAgentsSessionWSContext,
+} from "@/contexts/AgentsSessionWSContext";
 
 const PromptInputAttachmentsDisplay = () => {
   const attachments = usePromptInputAttachments();
@@ -67,8 +68,8 @@ const PromptInputAttachmentsDisplay = () => {
 // ];
 
 const AgentChat = () => {
-  const { promptSession } = useAgentsContext();
-  const { session } = useAgentsSession();
+  const { promptSession } = useAgentsWSContext();
+  const { session } = useAgentsSessionWSContext();
   const { messages } = session ?? {};
   const [text, setText] = useState<string>("");
   const [toolResults, setToolResults] = useState<
@@ -205,9 +206,9 @@ const AgentChat = () => {
 const AgentChatWrapper = ({ sessionId }: { sessionId: string }) => {
   console.log("AgentChatWrapper - sessionId", sessionId);
   return (
-    <AgentsSessionProvider sessionId={sessionId}>
+    <AgentsSessionWSProvider sessionId={sessionId}>
       <AgentChat />
-    </AgentsSessionProvider>
+    </AgentsSessionWSProvider>
   );
 };
 
