@@ -10,7 +10,12 @@ import {
   useRef,
   useState,
 } from "react";
-import type { BaseAgentSessionInfo, EuExtensionPath } from "shared-types";
+import type {
+  BaseAgentSessionInfo,
+  EuExtensionPath,
+  FileSystemErrorResponse,
+  ListDirectoryResponse,
+} from "shared-types";
 import { useAgentsDock } from "./AgentsDockContext";
 import { io, Socket } from "socket.io-client";
 
@@ -23,8 +28,12 @@ export type Project = {
 type AgentsContextType = {
   projects: Project[];
   addProject: (project: Project) => void;
+  addProjectByPath: (path: string) => void;
   selectAndAddProject: () => Promise<void>;
   createSession: (project: Project) => void;
+  listDirectory: (
+    path: string,
+  ) => Promise<ListDirectoryResponse | FileSystemErrorResponse>;
   loadPiSession: (
     sessionId: string,
     callback?: (session: BaseAgentSessionInfo | null) => void,
@@ -42,8 +51,10 @@ type AgentsContextType = {
 const AgentsContextWS = createContext<AgentsContextType>({
   projects: [],
   addProject: () => {},
+  addProjectByPath: () => {},
   selectAndAddProject: () => Promise.resolve(),
   createSession: () => {},
+  listDirectory: () => Promise.resolve({ error: "Socket is not connected" }),
   loadPiSession: () => Promise.resolve(),
   promptSession: () => Promise.resolve(),
   subscribeToNewSessionEvent: () => {},
@@ -73,7 +84,27 @@ export const AgentsWSProvider = ({
   const { addTab } = useAgentsDock();
 
   const addProject = (project: Project) => {
-    setProjects([...projects, project]);
+    setProjectMap((currentProjectMap) => {
+      if (currentProjectMap[project.path]) {
+        return currentProjectMap;
+      }
+
+      const newProjectMap = {
+        ...currentProjectMap,
+        [project.path]: project,
+      };
+      setProjects(Object.values(newProjectMap));
+      return newProjectMap;
+    });
+  };
+
+  const addProjectByPath = (path: string) => {
+    const pathParts = path.split("/").filter(Boolean);
+    addProject({
+      name: path === "/" ? "/" : pathParts[pathParts.length - 1] || path,
+      path,
+      sessions: [],
+    });
   };
 
   const selectProjectDir = async () => {
@@ -194,6 +225,19 @@ export const AgentsWSProvider = ({
     socket.emit("pi:promptSession", { sessionId, message, options }, () => {});
   };
 
+  const listDirectory = async (
+    path: string,
+  ): Promise<ListDirectoryResponse | FileSystemErrorResponse> => {
+    const socket = socketRef.current;
+    if (!socket) {
+      return { error: "Socket is not connected", path };
+    }
+
+    return await new Promise((resolve) => {
+      socket.emit("fs:listDirectory", { path }, resolve);
+    });
+  };
+
   const connectToSocketServer = () => {
     const newSocket = io(serverURL);
     newSocket.on("connect", () => {
@@ -257,8 +301,10 @@ export const AgentsWSProvider = ({
       value={{
         projects,
         addProject,
+        addProjectByPath,
         selectAndAddProject,
         createSession,
+        listDirectory,
         loadPiSession,
         promptSession,
         subscribeToNewSessionEvent,

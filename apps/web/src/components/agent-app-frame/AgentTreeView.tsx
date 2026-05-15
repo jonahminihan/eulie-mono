@@ -2,10 +2,18 @@ import { TypographyLarge } from "../ui/typography/TypographyLarge";
 import AgentTreeViewProject from "./AgentTreeViewProject";
 import { Button } from "../ui/button";
 import { FolderPlus } from "lucide-react";
+import { useState } from "react";
 import { useAgentsWSContext } from "@/contexts/AgentsContextWS";
+import { ProjectPickerDialog } from "@/components/project-picker/ProjectPickerDialog";
 
 const AgentTreeView = () => {
-  const { projects, selectAndAddProject } = useAgentsWSContext();
+  const { projects, addProjectByPath } = useAgentsWSContext();
+  const [projectPickerOpen, setProjectPickerOpen] = useState(false);
+
+  const handleSelectDirectory = (path: string) => {
+    addProjectByPath(path);
+    setProjectPickerOpen(false);
+  };
 
   return (
     <div className="flex flex-col justify-start">
@@ -14,7 +22,7 @@ const AgentTreeView = () => {
         <Button
           variant="ghost"
           className="flex justify-start"
-          onClick={selectAndAddProject}
+          onClick={() => setProjectPickerOpen(true)}
         >
           <FolderPlus />
         </Button>
@@ -24,6 +32,11 @@ const AgentTreeView = () => {
           <AgentTreeViewProject key={project.path} project={project} />
         ))}
       </div>
+      <ProjectPickerDialog
+        open={projectPickerOpen}
+        onOpenChange={setProjectPickerOpen}
+        onSelectDirectory={handleSelectDirectory}
+      />
     </div>
   );
 };

@@ -14,6 +14,7 @@ import {
 import path from "path";
 import cors from "cors";
 import { getExtensions } from "./stores/piStore.ts";
+import { listDirectory } from "./services/fileSystemService.ts";
 
 const app: Application = express();
 const server = createServer(app);
@@ -62,6 +63,18 @@ io.on("connection", (socket) => {
   socket.on("pi:getExtensionsPaths", async (callback) => {
     const extensionPaths = getExtensions();
     callback(extensionPaths);
+  });
+
+  socket.on("fs:listDirectory", async (data, callback) => {
+    try {
+      const result = await listDirectory(data?.path || "/");
+      callback(result);
+    } catch (error) {
+      callback({
+        error: error instanceof Error ? error.message : "Unknown filesystem error",
+        path: data?.path,
+      });
+    }
   });
 });
 
