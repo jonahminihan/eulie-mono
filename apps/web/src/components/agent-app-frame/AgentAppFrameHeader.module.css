@@ -1,0 +1,36 @@
+.appFrameHeader {
+  width: 100%;
+  height: 32px;
+  position: relative;
+}
+
+.appFrameHeaderElectron {
+  padding-left: 75px;
+}
+
+.appFrameHeaderDragArea {
+  width: 100%;
+  height: 100%;
+  app-region: drag;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -100;
+}
+
+.appFrameHeaderContent {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding-left: 0px;
+}
+
+.appFrameHeaderElectron {
+  padding-left: 75px;
+}
+
+.appFrameHeaderContentItem {
+  app-region: no-drag;
+}
