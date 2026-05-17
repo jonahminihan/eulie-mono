@@ -31,6 +31,11 @@ const createWindow = () => {
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
+    // remove the default titlebar
+    titleBarStyle: "hidden",
+    // expose window controls in Windows/Linux
+    ...(process.platform !== "darwin" ? { titleBarOverlay: true } : {}),
+    // trafficLightPosition: { x: 15, y: 15 },
   });
   // and load the index.html of the app.
   if (process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL) {

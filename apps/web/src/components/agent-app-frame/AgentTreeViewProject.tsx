@@ -8,19 +8,32 @@ import {
 import { TypographyP } from "../ui/typography/TypographyP";
 import { type Project } from "@/contexts/AgentsContext";
 import { useState } from "react";
-import { ChevronDown, ChevronRight, Plus } from "lucide-react";
+import { Folder, FolderOpen, Plus } from "lucide-react";
 import { TypographyMuted } from "../ui/typography/TypographyMuted";
 import { NonButton } from "../ui/non-button";
 import { useAgentsWSContext } from "@/contexts/AgentsContextWS";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "../ui/context-menu";
+import { useAgentsAppFrameContext } from "@/contexts/AgentsAppFrameContext";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 const AgentTreeViewProject = ({ project }: { project: Project }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { loadPiSession, createSession } = useAgentsWSContext();
+  const { handleSidePanelToggle } = useAgentsAppFrameContext();
+  const isMobile = useIsMobile();
 
-  const handleAddSession = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleAddSession = async (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    createSession(project);
+    const session = await createSession(project);
+    if (session && isMobile) {
+      handleSidePanelToggle();
+    }
   };
 
   return (
@@ -30,19 +43,22 @@ const AgentTreeViewProject = ({ project }: { project: Project }) => {
         nativeButton={false}
         render={
           <NonButton variant="ghost" className="w-full">
-            <div className="flex w-full justify-between">
-              <div className="flex flex-row justify-center items-center gap-2">
-                {isOpen ? <ChevronDown /> : <ChevronRight />}
-                <TypographyP text={project.name} className="text-left" />
-              </div>
-              <Button
-                variant="ghost"
-                className="flex justify-start"
-                onClick={handleAddSession}
-              >
-                <Plus />
-              </Button>
-            </div>
+            <ContextMenu>
+              <ContextMenuTrigger className="w-full">
+                <div className="flex w-full justify-between">
+                  <div className="flex flex-row justify-center items-center gap-2">
+                    {isOpen ? <FolderOpen /> : <Folder />}
+                    <TypographyP text={project.name} className="text-left" />
+                  </div>
+                </div>
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem onClick={handleAddSession}>
+                  <Plus />
+                  <TypographyP text="Add Session" className="text-left" />
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
           </NonButton>
         }
       ></CollapsibleTrigger>
@@ -58,7 +74,12 @@ const AgentTreeViewProject = ({ project }: { project: Project }) => {
               >
                 <TypographyP
                   key={session.id}
-                  text={session.name ?? session.firstMessage ?? "New Session"}
+                  text={
+                    session.name ??
+                    (session.firstMessage && session.firstMessage !== ""
+                      ? session.firstMessage
+                      : "New Session")
+                  }
                   className="text-left truncate"
                 />
               </Button>

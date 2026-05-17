@@ -10,11 +10,7 @@ const isDev = !!process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL;
 
 export const startServer = () => {
   if (isDev) {
-    const serverProcess = spawn("node", ["../server/src/index.ts"]);
-    serverProcess.on("error", (error) => {
-      log.error("serverProcess error", error);
-    });
-    return serverProcess;
+    // Run "turbo run dev" if you want the server to run at the same time
   } else {
     const serverProcess = spawn("node", [
       path.join(process.resourcesPath, "./server/src/index.ts"),

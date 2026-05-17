@@ -18,6 +18,7 @@ import type {
 } from "shared-types";
 import { useAgentsDock } from "./AgentsDockContext";
 import { io, Socket } from "socket.io-client";
+import { usePref, type Server } from "./PrefContext";
 
 export type Project = {
   name: string;
@@ -30,7 +31,7 @@ type AgentsContextType = {
   addProject: (project: Project) => void;
   addProjectByPath: (path: string) => void;
   selectAndAddProject: () => Promise<void>;
-  createSession: (project: Project) => void;
+  createSession: (project: Project) => Promise<BaseAgentSessionInfo | null>;
   listDirectory: (
     path: string,
   ) => Promise<ListDirectoryResponse | FileSystemErrorResponse>;
@@ -53,7 +54,7 @@ const AgentsContextWS = createContext<AgentsContextType>({
   addProject: () => {},
   addProjectByPath: () => {},
   selectAndAddProject: () => Promise.resolve(),
-  createSession: () => {},
+  createSession: () => Promise.resolve(null),
   listDirectory: () => Promise.resolve({ error: "Socket is not connected" }),
   loadPiSession: () => Promise.resolve(),
   promptSession: () => Promise.resolve(),
@@ -82,7 +83,7 @@ export const AgentsWSProvider = ({
   const [serverURL] = useState<string>("http://localhost:3030");
   const initRef = useRef(false);
   const { addTab } = useAgentsDock();
-
+  const { servers } = usePref();
   const addProject = (project: Project) => {
     setProjectMap((currentProjectMap) => {
       if (currentProjectMap[project.path]) {
@@ -119,47 +120,52 @@ export const AgentsWSProvider = ({
   };
 
   const createSession = async (project: Project) => {
-    const socket = socketRef.current;
-    if (!socket) return;
-    socket.emit(
-      "pi:createSession",
-      { cwd: project.path },
-      async (session: BaseAgentSessionInfo | null) => {
-        if (session) {
-          const newSession: SessionInfo = {
-            ...session,
-            path: project.path,
-            id: session.sessionId,
-            cwd: project.path,
-            created: new Date(),
-            modified: new Date(),
-            messageCount: 0,
-            firstMessage: "",
-            allMessagesText: "",
-          };
-          const newProjectMap = {
-            ...projectMap,
-            [project.path]: {
-              ...project,
-              sessions: [...project.sessions, newSession],
-            },
-          };
-          setProjectMap(newProjectMap);
-          setProjects(Object.values(newProjectMap));
-          addTab({
-            id: session.sessionId,
-            component: "default",
-            title: (
-              session.name ||
-              session.firstMessage ||
-              "New Session"
-            ).slice(0, 7),
-            renderer: "always",
-          });
-        }
-        return session;
-      },
-    );
+    return new Promise<BaseAgentSessionInfo | null>((resolve, reject) => {
+      const socket = socketRef.current;
+      if (!socket) {
+        reject(new Error("Socket is not connected"));
+        return;
+      }
+      socket.emit(
+        "pi:createSession",
+        { cwd: project.path },
+        async (session: BaseAgentSessionInfo | null) => {
+          if (session) {
+            const newSession: SessionInfo = {
+              ...session,
+              path: project.path,
+              id: session.sessionId,
+              cwd: project.path,
+              created: new Date(),
+              modified: new Date(),
+              messageCount: 0,
+              firstMessage: "",
+              allMessagesText: "",
+            };
+            const newProjectMap = {
+              ...projectMap,
+              [project.path]: {
+                ...project,
+                sessions: [...project.sessions, newSession],
+              },
+            };
+            setProjectMap(newProjectMap);
+            setProjects(Object.values(newProjectMap));
+            addTab({
+              id: session.sessionId,
+              component: "default",
+              title: (
+                session.name ||
+                session.firstMessage ||
+                "New Session"
+              ).slice(0, 7),
+              renderer: "always",
+            });
+          }
+          resolve(session);
+        },
+      );
+    });
   };
 
   const fetchPiSessions = async () => {
@@ -238,8 +244,8 @@ export const AgentsWSProvider = ({
     });
   };
 
-  const connectToSocketServer = () => {
-    const newSocket = io(serverURL);
+  const connectToSocketServer = (server: Server) => {
+    const newSocket = io(`http://${server.ip}:${server.port}`);
     newSocket.on("connect", () => {
       console.log("connected to socket server");
       fetchPiSessions();
@@ -252,6 +258,7 @@ export const AgentsWSProvider = ({
     });
     // setSocket(newSocket);
     socketRef.current = newSocket;
+    console.log("socketRef.current", socketRef.current?.io);
     return newSocket;
   };
 
@@ -289,12 +296,23 @@ export const AgentsWSProvider = ({
   };
 
   useLayoutEffect(() => {
-    if (!initRef.current) {
-      initRef.current = true;
-      connectToSocketServer();
-      fetchExtensionData();
+    console.log("servers", servers);
+    // if (!initRef.current) {
+    initRef.current = true;
+    if (servers.length > 0) {
+      for (const server of servers) {
+        if (
+          socketRef.current?.io.opts.hostname !== server.ip &&
+          socketRef.current?.io.opts.port !== server.port
+        ) {
+          connectToSocketServer(server);
+          fetchExtensionData();
+        }
+      }
     }
-  }, []);
+    // connectToSocketServer();
+    // }
+  }, [servers]);
 
   return (
     <AgentsContextWS.Provider

@@ -3,14 +3,10 @@ import { Button } from "../ui/button";
 import styles from "./AgentAppFrameHeader.module.css";
 import { cn, isInElectron } from "@/lib/utils";
 import { TypographyH4 } from "../ui/typography/TypographyH4";
+import { useAgentsAppFrameContext } from "@/contexts/AgentsAppFrameContext";
 
-const AgentAppFrameHeader = ({
-  onSidePanelToggle,
-  isSidePanelOpen,
-}: {
-  onSidePanelToggle: () => void;
-  isSidePanelOpen: boolean;
-}) => {
+const AgentAppFrameHeader = ({}: {}) => {
+  const { isSidePanelOpen, handleSidePanelToggle } = useAgentsAppFrameContext();
   return (
     <div className={styles.appFrameHeader}>
       <div
@@ -30,7 +26,7 @@ const AgentAppFrameHeader = ({
           variant="ghost"
           size="icon"
           className={styles.appFrameHeaderContentItem}
-          onClick={onSidePanelToggle}
+          onClick={handleSidePanelToggle}
         >
           {isSidePanelOpen ? <PanelLeftClose /> : <PanelLeftOpen />}
         </Button>
