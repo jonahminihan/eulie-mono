@@ -3,7 +3,23 @@ import type {
   AgentTool,
   ThinkingLevel,
 } from "@earendil-works/pi-agent-core";
-import type { Model } from "@earendil-works/pi-ai";
+import type { Model, ModelThinkingLevel } from "@earendil-works/pi-ai";
+
+export type AvailableModelInfo = Pick<
+  Model<any>,
+  "id" | "name" | "provider" | "input" | "reasoning"
+> & {
+  key: string;
+  thinkingLevels: ModelThinkingLevel[];
+};
+
+export type AvailableModelsResponse = Record<string, AvailableModelInfo>;
+
+export interface ModelThinkingState {
+  model: Model<any> | undefined;
+  thinkingLevel: ThinkingLevel;
+  error?: string;
+}
 
 export interface BaseAgentSessionInfo {
   model: Model<any>;

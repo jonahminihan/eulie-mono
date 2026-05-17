@@ -7,9 +7,12 @@ import { Server } from "socket.io";
 import { createServer } from "http";
 import {
   createPiSession,
+  getAvailableModels,
   getPiSessions,
   loadPiSession,
   promptSession,
+  setPiSessionModel,
+  setPiSessionThinkingLevel,
 } from "./wrappers/pi.ts";
 import path from "path";
 import cors from "cors";
@@ -60,6 +63,23 @@ io.on("connection", (socket) => {
     callback?.(result);
   });
 
+  socket.on("pi:getAvailableModels", async (callback) => {
+    callback(getAvailableModels());
+  });
+
+  socket.on("pi:setModel", async (data, callback) => {
+    const result = await setPiSessionModel(data?.sessionId, data?.modelKey);
+    callback?.(result);
+  });
+
+  socket.on("pi:setThinkingLevel", async (data, callback) => {
+    const result = setPiSessionThinkingLevel(
+      data?.sessionId,
+      data?.thinkingLevel,
+    );
+    callback?.(result);
+  });
+
   socket.on("pi:getExtensionsPaths", async (callback) => {
     const extensionPaths = getExtensions();
     callback(extensionPaths);
@@ -71,7 +91,8 @@ io.on("connection", (socket) => {
       callback(result);
     } catch (error) {
       callback({
-        error: error instanceof Error ? error.message : "Unknown filesystem error",
+        error:
+          error instanceof Error ? error.message : "Unknown filesystem error",
         path: data?.path,
       });
     }

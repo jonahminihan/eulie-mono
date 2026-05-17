@@ -13,6 +13,11 @@ import {
   PromptInputBody,
   PromptInputFooter,
   PromptInputHeader,
+  PromptInputSelect,
+  PromptInputSelectContent,
+  PromptInputSelectItem,
+  PromptInputSelectTrigger,
+  PromptInputSelectValue,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
@@ -33,6 +38,7 @@ import { TypographyP } from "../ui/typography/TypographyP";
 
 import "./AgentChat.module.css";
 import { useAgentsWSContext } from "@/contexts/AgentsContextWS";
+import type { AvailableModelsResponse } from "shared-types";
 import {
   AgentsSessionWSProvider,
   useAgentsSessionWSContext,
@@ -68,16 +74,20 @@ const PromptInputAttachmentsDisplay = () => {
 // ];
 
 const AgentChat = () => {
-  const { promptSession } = useAgentsWSContext();
+  const { getAvailableModels, promptSession, setModel, setThinkingLevel } =
+    useAgentsWSContext();
   const { session } = useAgentsSessionWSContext();
   const { messages } = session ?? {};
   const [text, setText] = useState<string>("");
   const [toolResults, setToolResults] = useState<
     Record<string, ToolResultMessage>
   >({});
-  // const [model, setModel] = useState<string>(models[0].id);
-  // const [messages, setMessages] = useState([]);
-  // const [status, setStatus] = useState("idle");
+  const [availableModels, setAvailableModels] =
+    useState<AvailableModelsResponse>({});
+  const [selectedModelKey, setSelectedModelKey] = useState<string>("");
+  const [selectedThinkingLevel, setSelectedThinkingLevel] =
+    useState<string>("off");
+  const status = "idle";
   console.log("session", session);
 
   const handlePromptSession = async (message: PromptInputMessage) => {
@@ -114,6 +124,43 @@ const AgentChat = () => {
       setToolResults(newToolResults);
     }
   }, [messages, session]);
+
+  useEffect(() => {
+    if (!session) return;
+
+    getAvailableModels().then((models) => {
+      setAvailableModels(models);
+    });
+  }, [session?.sessionId]);
+
+  useEffect(() => {
+    if (session?.model) {
+      setSelectedModelKey(`${session.model.provider}/${session.model.id}`);
+      setSelectedThinkingLevel(session.thinkingLevel);
+    }
+  }, [session?.model, session?.thinkingLevel]);
+
+  const modelOptions = Object.values(availableModels);
+  const selectedModel = availableModels[selectedModelKey];
+  const thinkingOptions = selectedModel?.thinkingLevels ?? [];
+
+  const handleModelChange = async (modelKey: string) => {
+    if (!session) return;
+    const response = await setModel(session.sessionId, modelKey);
+    if (response.model) {
+      setSelectedModelKey(`${response.model.provider}/${response.model.id}`);
+    }
+    setSelectedThinkingLevel(response.thinkingLevel);
+  };
+
+  const handleThinkingLevelChange = async (thinkingLevel: string) => {
+    if (!session) return;
+    const response = await setThinkingLevel(session.sessionId, thinkingLevel);
+    if (response.model) {
+      setSelectedModelKey(`${response.model.provider}/${response.model.id}`);
+    }
+    setSelectedThinkingLevel(response.thinkingLevel);
+  };
 
   console.log("AgentChat - session", session);
 
@@ -173,23 +220,43 @@ const AgentChat = () => {
                 <GlobeIcon size={16} />
                 <span>Search</span>
               </PromptInputButton> */}
-                {/* <PromptInputSelect
-                  onValueChange={(value) => {
-                    setModel(value);
-                  }}
-                  value={model}
+                <PromptInputSelect
+                  disabled={modelOptions.length === 0}
+                  onValueChange={(value) => handleModelChange(String(value))}
+                  value={selectedModelKey}
                 >
                   <PromptInputSelectTrigger>
-                    <PromptInputSelectValue />
+                    <PromptInputSelectValue placeholder="Model" />
                   </PromptInputSelectTrigger>
                   <PromptInputSelectContent>
-                    {models.map((model) => (
-                      <PromptInputSelectItem key={model.id} value={model.id}>
+                    {modelOptions.map((model) => (
+                      <PromptInputSelectItem key={model.key} value={model.key}>
                         {model.name}
                       </PromptInputSelectItem>
                     ))}
                   </PromptInputSelectContent>
-                </PromptInputSelect> */}
+                </PromptInputSelect>
+                <PromptInputSelect
+                  disabled={thinkingOptions.length === 0}
+                  onValueChange={(value) =>
+                    handleThinkingLevelChange(String(value))
+                  }
+                  value={selectedThinkingLevel}
+                >
+                  <PromptInputSelectTrigger>
+                    <PromptInputSelectValue placeholder="Thinking" />
+                  </PromptInputSelectTrigger>
+                  <PromptInputSelectContent>
+                    {thinkingOptions.map((thinkingLevel) => (
+                      <PromptInputSelectItem
+                        key={thinkingLevel}
+                        value={thinkingLevel}
+                      >
+                        {thinkingLevel}
+                      </PromptInputSelectItem>
+                    ))}
+                  </PromptInputSelectContent>
+                </PromptInputSelect>
               </PromptInputTools>
               <PromptInputSubmit
                 disabled={!text && !status}

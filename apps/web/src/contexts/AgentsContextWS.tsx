@@ -11,10 +11,12 @@ import {
   useState,
 } from "react";
 import type {
+  AvailableModelsResponse,
   BaseAgentSessionInfo,
   EuExtensionPath,
   FileSystemErrorResponse,
   ListDirectoryResponse,
+  ModelThinkingState,
 } from "shared-types";
 import { useAgentsDock } from "./AgentsDockContext";
 import { io, Socket } from "socket.io-client";
@@ -44,6 +46,15 @@ type AgentsContextType = {
     message: string,
     options?: PromptOptions,
   ) => Promise<void>;
+  getAvailableModels: () => Promise<AvailableModelsResponse>;
+  setModel: (
+    sessionId: string,
+    modelKey: string,
+  ) => Promise<ModelThinkingState>;
+  setThinkingLevel: (
+    sessionId: string,
+    thinkingLevel: string,
+  ) => Promise<ModelThinkingState>;
   subscribeToNewSessionEvent: (
     callback: (event: AgentSessionEvent & { sessionId: string }) => void,
   ) => void;
@@ -58,6 +69,19 @@ const AgentsContextWS = createContext<AgentsContextType>({
   listDirectory: () => Promise.resolve({ error: "Socket is not connected" }),
   loadPiSession: () => Promise.resolve(),
   promptSession: () => Promise.resolve(),
+  getAvailableModels: () => Promise.resolve({}),
+  setModel: () =>
+    Promise.resolve({
+      model: undefined,
+      thinkingLevel: "off",
+      error: "Socket is not connected",
+    }),
+  setThinkingLevel: () =>
+    Promise.resolve({
+      model: undefined,
+      thinkingLevel: "off",
+      error: "Socket is not connected",
+    }),
   subscribeToNewSessionEvent: () => {},
 });
 
@@ -231,6 +255,51 @@ export const AgentsWSProvider = ({
     socket.emit("pi:promptSession", { sessionId, message, options }, () => {});
   };
 
+  const getAvailableModels = async (): Promise<AvailableModelsResponse> => {
+    const socket = socketRef.current;
+    if (!socket) return {};
+
+    return await new Promise((resolve) => {
+      socket.emit("pi:getAvailableModels", resolve);
+    });
+  };
+
+  const setModel = async (
+    sessionId: string,
+    modelKey: string,
+  ): Promise<ModelThinkingState> => {
+    const socket = socketRef.current;
+    if (!socket) {
+      return {
+        model: undefined,
+        thinkingLevel: "off",
+        error: "Socket is not connected",
+      };
+    }
+
+    return await new Promise((resolve) => {
+      socket.emit("pi:setModel", { sessionId, modelKey }, resolve);
+    });
+  };
+
+  const setThinkingLevel = async (
+    sessionId: string,
+    thinkingLevel: string,
+  ): Promise<ModelThinkingState> => {
+    const socket = socketRef.current;
+    if (!socket) {
+      return {
+        model: undefined,
+        thinkingLevel: "off",
+        error: "Socket is not connected",
+      };
+    }
+
+    return await new Promise((resolve) => {
+      socket.emit("pi:setThinkingLevel", { sessionId, thinkingLevel }, resolve);
+    });
+  };
+
   const listDirectory = async (
     path: string,
   ): Promise<ListDirectoryResponse | FileSystemErrorResponse> => {
@@ -325,6 +394,9 @@ export const AgentsWSProvider = ({
         listDirectory,
         loadPiSession,
         promptSession,
+        getAvailableModels,
+        setModel,
+        setThinkingLevel,
         subscribeToNewSessionEvent,
       }}
     >
